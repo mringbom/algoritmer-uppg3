@@ -6,22 +6,64 @@ import java.util.Map;
 import javax.swing.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException, FileFormatException {
 
-        // Choose a file in the folder Graphs in the current directory
-        JFileChooser jf = new JFileChooser("Graphs");
-        int result = jf.showOpenDialog(null);
-        File selectedFile = jf.getSelectedFile();
-        Graph g = readGraph(selectedFile);
-        TopSort topSort = new TopSort();
+    public static void main(String[] args) {
+        System.out.println("kortaste ordväg");
+        System.out.println("-------------------");
 
-        try {
-            topSort.TopSort(g);
+ 
+        // Read Words.txt
+       
+        List<String> words = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader("Words.txt"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                line = line.trim().toLowerCase();
+                if (!line.isEmpty()) words.add(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Kunde inte läsa Words.txt");
+            return;
         }
-        catch (CycleFound e){
-            System.out.println(e.getMessage());
+
+  
+        // Build graph
+       
+        Graph g = new Graph();
+
+        for (String w : words) g.addNode(w);
+
+        g.buildEdgesFromWords(words);
+
+        System.out.println("\nAntal ord: " + g.size());
+        System.out.println("Graf färdigbyggd.\n");
+
+
+        // Ask user
+    
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Startord: ");
+        String start = sc.nextLine().trim().toLowerCase();
+
+        System.out.print("Målord: ");
+        String goal = sc.nextLine().trim().toLowerCase();
+
+        System.out.println();
+
+
+        // shortest path
+        
+        List<String> path = g.shortestPath(start, goal);
+
+        if (path == null) {
+            System.out.println("Ingen sekvens finns mellan " + start + " och " + goal);
+        } else {
+            System.out.println("Kortaste sekvensen (" + path.size() + " steg):");
+            System.out.println(String.join(" -> ", path));
         }
     }
+}
 
     // Read in a graph from a file, print out the adjacency list, returns the graph
     public static Graph readGraph(File selectedFile) throws IOException, FileFormatException {
