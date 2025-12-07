@@ -6,64 +6,50 @@ import java.util.Map;
 import javax.swing.*;
 import java.util.Scanner;
 
-public class Main {
+public static void main(String[] args) {
+    System.out.println("Kortaste ordväg");
+    System.out.println("-------------------");
 
-    public static void main(String[] args) {
-        System.out.println("kortaste ordväg");
-        System.out.println("-------------------");
+    List<String> words = new ArrayList<>();
 
- 
-        // Read Words.txt
-       
-        List<String> words = new ArrayList<>();
-
-        try (BufferedReader br = new BufferedReader(new FileReader("Words.txt"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                line = line.trim().toLowerCase();
-                if (!line.isEmpty()) words.add(line);
-            }
-        } catch (IOException e) {
-            System.err.println("Kunde inte läsa Words.txt");
-            return;
+    // Läs words.txt
+    try (BufferedReader br = new BufferedReader(new FileReader("Words.txt"))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            line = line.trim().toLowerCase();
+            if (!line.isEmpty()) words.add(line);
         }
-
-  
-        // Build graph
-       
-        Graph g = new Graph();
-
-        for (String w : words) g.addNode(w);
-
-        g.buildEdgesFromWords(words);
-
-        System.out.println("\nAntal ord: " + g.size());
-        System.out.println("Graf färdigbyggd.\n");
-
-
-        // Ask user
-    
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Startord: ");
-        String start = sc.nextLine().trim().toLowerCase();
-
-        System.out.print("Målord: ");
-        String goal = sc.nextLine().trim().toLowerCase();
-
-        System.out.println();
-
-
-        // shortest path
-        
-        List<String> path = g.shortestPath(start, goal);
-
-        if (path == null) {
-            System.out.println("Ingen sekvens finns mellan " + start + " och " + goal);
-        } else {
-            System.out.println("Kortaste sekvensen (" + path.size() + " steg):");
-            System.out.println(String.join(" -> ", path));
-        }
+    } catch (IOException e) {
+        System.out.println("Kunde inte läsa Words.txt");
+        return;
     }
+
+    // Bygg graf
+    Graph g = new Graph();
+    for (String w : words) {
+        g.addNode(w);
+    }
+    g.buildEdgesFromWords(words);
+
+    // Hämta ord från användaren
+    Scanner sc = new Scanner(System.in);
+    System.out.print("Startord: ");
+    String start = sc.nextLine().trim().toLowerCase();
+
+    System.out.print("Målord: ");
+    String goal = sc.nextLine().trim().toLowerCase();
+
+    // Kör kortaste väg 
+    List<String> path = g.shortestPath(start, goal);
+
+    if (path == null) {
+        System.out.println("Ingen väg finns mellan " + start + " och " + goal);
+    } else {
+        System.out.println("\nKortaste sekvens:");
+        System.out.println(String.join(" -> ", path));
+    }
+}
+
 
 
     // Read in a graph from a file, print out the adjacency list, returns the graph
@@ -303,22 +289,23 @@ class Queue {
     }
 }
 
-class Dijkstra {
-    public static List<String> shortestPath(Graph graph, String start, String goal) {
-        Map<String, Integer> distance = new HashMap<>();
-        Map<String, String> previous = new HashMap<>();
-        PriorityQueue<String> queue = new PriorityQueue<>(Comparator.comparingInt(distance::get));
+import java.util.*;
 
-        for (String node : graph.nodes.keySet()) {
-            distance.put(node, Integer.MAX_VALUE);
-        }
-        distance.put(start, 0);
+class Dijkstra {
+
+    public static List<String> shortestPath(Graph graph, String start, String goal) {
+
+        Queue<String> queue = new LinkedList<>();
+        Map<String, String> previous = new HashMap<>();
+        Set<String> visited = new HashSet<>();
+
         queue.add(start);
+        visited.add(start);
 
         while (!queue.isEmpty()) {
             String current = queue.poll();
+
             if (current.equals(goal)) {
-                // Build path
                 List<String> path = new ArrayList<>();
                 for (String node = goal; node != null; node = previous.get(node)) {
                     path.add(node);
@@ -327,21 +314,19 @@ class Dijkstra {
                 return path;
             }
 
-            Vertex currentVertex = graph.nodes.get(current);
-            for (Vertex neighbor : currentVertex.adjacentNodes) {
-                String neighborName = neighbor.name;
-                int newDist = distance.get(current) + 1; // Each edge has weight 1
-                if (newDist < distance.get(neighborName)) {
-                    distance.put(neighborName, newDist);
-                    previous.put(neighborName, current);
-                    queue.remove(neighborName); // Remove if already present
-                    queue.add(neighborName);
+            Vertex v = graph.nodes.get(current);
+
+            for (Vertex neighbor : v.adjacentNodes) {
+                String name = neighbor.name;
+
+                if (!visited.contains(name)) {
+                    visited.add(name);
+                    previous.put(name, current);
+                    queue.add(name);
                 }
             }
         }
 
-        return null; // No path found
+        return null; // ingen väg hittades
     }
 }
-
-
