@@ -63,7 +63,7 @@ public class Main {
             System.out.println(String.join(" -> ", path));
         }
     }
-}
+
 
     // Read in a graph from a file, print out the adjacency list, returns the graph
     public static Graph readGraph(File selectedFile) throws IOException, FileFormatException {
@@ -122,6 +122,7 @@ public class Main {
         }
         r.close();  // Close the reader
         return g;
+    
     }
 }
 
