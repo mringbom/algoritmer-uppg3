@@ -161,6 +161,12 @@ class Graph {
             }
         }
     }
+    public List<String> shortestPath(String start, String goal) {
+        if (!nodes.containsKey(start) || !nodes.containsKey(goal)) {
+        return null;
+    }
+        return Dijkstra.shortestPath(this, start, goal);
+    }
 }
 
 class Vertex {
@@ -295,3 +301,46 @@ class Queue {
         return (last == null);
     }
 }
+
+class Dijkstra {
+    public static List<String> shortestPath(Graph graph, String start, String goal) {
+        Map<String, Integer> distance = new HashMap<>();
+        Map<String, String> previous = new HashMap<>();
+        PriorityQueue<String> queue = new PriorityQueue<>(Comparator.comparingInt(distance::get));
+
+        for (String node : graph.nodes.keySet()) {
+            distance.put(node, Integer.MAX_VALUE);
+        }
+        distance.put(start, 0);
+        queue.add(start);
+
+        while (!queue.isEmpty()) {
+            String current = queue.poll();
+            if (current.equals(goal)) {
+                // Build path
+                List<String> path = new ArrayList<>();
+                for (String node = goal; node != null; node = previous.get(node)) {
+                    path.add(node);
+                }
+                Collections.reverse(path);
+                return path;
+            }
+
+            Vertex currentVertex = graph.nodes.get(current);
+            for (Vertex neighbor : currentVertex.adjacentNodes) {
+                String neighborName = neighbor.name;
+                int newDist = distance.get(current) + 1; // Each edge has weight 1
+                if (newDist < distance.get(neighborName)) {
+                    distance.put(neighborName, newDist);
+                    previous.put(neighborName, current);
+                    queue.remove(neighborName); // Remove if already present
+                    queue.add(neighborName);
+                }
+            }
+        }
+
+        return null; // No path found
+    }
+}
+
+
