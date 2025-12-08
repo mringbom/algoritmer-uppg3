@@ -43,8 +43,20 @@ public class Main{
         System.out.print("Start word: ");
         String start = sc.nextLine().trim().toLowerCase();
 
+        // Check if user input in file
+        if (!g.nodes.containsKey(start)){
+            System.out.println("The word '" + start + "' is not in the file.");
+            return;
+        }
+
         System.out.print("End word: ");
         String goal = sc.nextLine().trim().toLowerCase();
+
+        // Check if user input in file
+        if (!g.nodes.containsKey(goal)) {
+            System.out.println("The word '" + goal + "' is not in the file.");
+            return;
+        }
 
         // Check shortest path and if it exists  
         List<String> path = g.shortestPath(start, goal);
