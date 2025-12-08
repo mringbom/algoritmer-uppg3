@@ -100,7 +100,7 @@ class Graph {
         destination.addDegree();
     }
 
-    // Print, for troubleshooting
+    // Builds path between words
     public void buildEdgesFromWords(List<String> words){
         int n = words.size();
 
