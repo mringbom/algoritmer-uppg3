@@ -52,66 +52,66 @@ public static void main(String[] args) {
 
 
 
-    // Read in a graph from a file, print out the adjacency list, returns the graph
-    public static Graph readGraph(File selectedFile) throws IOException, FileFormatException {
+// Read in a graph from a file, print out the adjacency list, returns the graph
+public static Graph readGraph(File selectedFile) throws IOException, FileFormatException {
 
-        Graph g = new Graph();
-        BufferedReader r = new BufferedReader(new FileReader(selectedFile));
-        String line=null;
+    Graph g = new Graph();
+    BufferedReader r = new BufferedReader(new FileReader(selectedFile));
+    String line=null;
 
-        try {
-            // Skip over comment lines in the beginning of the file
-            while ( !(line = r.readLine()).equalsIgnoreCase("[Vertex]") ) {} ;
+    try {
+        // Skip over comment lines in the beginning of the file
+        while ( !(line = r.readLine()).equalsIgnoreCase("[Vertex]") ) {} ;
 
-            // Read all vertex definitions
-            while (!(line=r.readLine()).equalsIgnoreCase("[Edges]") ) {
-                if (line.trim().length() > 0) {  // Skip empty lines
-                    try {
-                        // Split the line into a comma separated list V1,V2 etc
-                        String[] nodeNames=line.split(",");
-
-                        for (String n:nodeNames) {
-                            String node = n.trim();
-                            // Add node to graph
-                            g.addNode(node);
-                        }
-
-                    } catch (Exception e) {   // Something wrong in the graph file
-                        r.close();
-                        throw new FileFormatException("Error in vertex definitions");
-                    }
-                }
-            }
-
-        } catch (NullPointerException e1) {  // The input file has wrong format
-            throw new FileFormatException(" No [Vertex] or [Edges] section found in the file " + selectedFile.getName());
-        }
-
-        // Read all edge definitions
-        while ( (line=r.readLine()) !=null ) {
+        // Read all vertex definitions
+        while (!(line=r.readLine()).equalsIgnoreCase("[Edges]") ) {
             if (line.trim().length() > 0) {  // Skip empty lines
                 try {
-                    String[] edges=line.split(",");           // Edges are comma separated pairs e1:e2
+                    // Split the line into a comma separated list V1,V2 etc
+                    String[] nodeNames=line.split(",");
 
-                    for (String e:edges) {       // For all edges
-                        String[] edgePair = e.trim().split(":"); //Split edge components v1:v2
-                        String v = edgePair[0].trim();
-                        String w = edgePair[1].trim();
-                        // Add edges to graph
-                        g.addEdge(v, w);
+                    for (String n:nodeNames) {
+                        String node = n.trim();
+                        // Add node to graph
+                        g.addNode(node);
                     }
 
-                } catch (Exception e) { //Something is wrong, Edges should be in format v1:v2
+                } catch (Exception e) {   // Something wrong in the graph file
                     r.close();
-                    throw new FileFormatException("Error in edge definition");
+                    throw new FileFormatException("Error in vertex definitions");
                 }
             }
         }
-        r.close();  // Close the reader
-        return g;
-    
+
+    } catch (NullPointerException e1) {  // The input file has wrong format
+        throw new FileFormatException(" No [Vertex] or [Edges] section found in the file " + selectedFile.getName());
     }
+
+    // Read all edge definitions
+    while ( (line=r.readLine()) !=null ) {
+        if (line.trim().length() > 0) {  // Skip empty lines
+            try {
+                String[] edges=line.split(",");           // Edges are comma separated pairs e1:e2
+
+                for (String e:edges) {       // For all edges
+                    String[] edgePair = e.trim().split(":"); //Split edge components v1:v2
+                    String v = edgePair[0].trim();
+                    String w = edgePair[1].trim();
+                    // Add edges to graph
+                    g.addEdge(v, w);
+                }
+
+            } catch (Exception e) { //Something is wrong, Edges should be in format v1:v2
+                r.close();
+                throw new FileFormatException("Error in edge definition");
+            }
+        }
+    }
+    r.close();  // Close the reader
+    return g;
+
 }
+
 
 @SuppressWarnings("serial")
 class FileFormatException extends Exception { //Input file has the wrong format
