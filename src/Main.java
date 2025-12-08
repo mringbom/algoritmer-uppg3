@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import javax.annotation.processing.FilerException;
 import javax.swing.*;
 
 
@@ -7,11 +8,10 @@ public class Main{
 
     public static void main(String[] args) {
 
-        // Choose a file in the folder Graphs in the current directory
-        JFileChooser jf = new JFileChooser("Graphs");
+        // Let's user pick a file
+        JFileChooser jf = new JFileChooser(".");
         int result = jf.showOpenDialog(null);
         File selectedFile = jf.getSelectedFile();
-        Graph g = readGraph(selectedFile);
 
         System.out.println("Shortest path");
         System.out.println("-------------------");
@@ -19,14 +19,16 @@ public class Main{
         List<String> words = new ArrayList<>();
 
         // Read words.txt
-        try (BufferedReader br = new BufferedReader(new FileReader("Words.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(selectedFile))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim().toLowerCase();
-                if (!line.isEmpty()) words.add(line);
+                if (!line.isEmpty()){
+                    words.add(line);
+                }
             }
         } catch (IOException e) {
-            System.out.println("Kunde inte läsa Words.txt");
+            System.out.println("Could not read file " + selectedFile.getName());
             return;
         }
 
@@ -39,10 +41,10 @@ public class Main{
 
         // Read user input
         Scanner sc = new Scanner(System.in);
-        System.out.print("First word: ");
+        System.out.print("Start word: ");
         String start = sc.nextLine().trim().toLowerCase();
 
-        System.out.print("Second word: ");
+        System.out.print("End word: ");
         String goal = sc.nextLine().trim().toLowerCase();
 
         // Check shortest path and if it exists  
@@ -54,70 +56,10 @@ public class Main{
             System.out.println("\nShortest path:");
             System.out.println(String.join(" -> ", path));
         }
-    }
 
-
-
-    // Read in a graph from a file, print out the adjacency list, returns the graph
-    public static Graph readGraph(File selectedFile) throws IOException, FileFormatException {
-
-        Graph g = new Graph();
-        BufferedReader r = new BufferedReader(new FileReader(selectedFile));
-        String line=null;
-
-        try {
-            // Skip over comment lines in the beginning of the file
-            while ( !(line = r.readLine()).equalsIgnoreCase("[Vertex]") ) {} ;
-
-            // Read all vertex definitions
-            while (!(line=r.readLine()).equalsIgnoreCase("[Edges]") ) {
-                if (line.trim().length() > 0) {  // Skip empty lines
-                    try {
-                        // Split the line into a comma separated list V1,V2 etc
-                        String[] nodeNames=line.split(",");
-
-                        for (String n:nodeNames) {
-                            String node = n.trim();
-                            // Add node to graph
-                            g.addNode(node);
-                        }
-
-                    } catch (Exception e) {   // Something wrong in the graph file
-                        r.close();
-                        throw new FileFormatException("Error in vertex definitions");
-                    }
-                }
-            }
-
-        } catch (NullPointerException e1) {  // The input file has wrong format
-            throw new FileFormatException(" No [Vertex] or [Edges] section found in the file " + selectedFile.getName());
-        }
-
-        // Read all edge definitions
-        while ( (line=r.readLine()) !=null ) {
-            if (line.trim().length() > 0) {  // Skip empty lines
-                try {
-                    String[] edges=line.split(",");           // Edges are comma separated pairs e1:e2
-
-                    for (String e:edges) {       // For all edges
-                        String[] edgePair = e.trim().split(":"); //Split edge components v1:v2
-                        String v = edgePair[0].trim();
-                        String w = edgePair[1].trim();
-                        // Add edges to graph
-                        g.addEdge(v, w);
-                    }
-
-                } catch (Exception e) { //Something is wrong, Edges should be in format v1:v2
-                    r.close();
-                    throw new FileFormatException("Error in edge definition");
-                }
-            }
-        }
-        r.close();  // Close the reader
-        return g;
+        sc.close();
     }
 }
-
 
 /* 
     FILE ERROR
@@ -150,6 +92,10 @@ class Graph {
     public void addEdge(String v, String w) {
         Vertex source = nodes.get(v);
         Vertex destination = nodes.get(w);
+
+        // Safety check
+        if (source == null || destination == null) return; 
+
         // Add destination as adjacent to source, increase indegree of destination
         source.addAdjacentNode(destination);
         destination.addDegree();
@@ -163,6 +109,8 @@ class Graph {
             }
         }
     }
+
+    // Shortest path using Dikjstra's algorithm
     public List<String> shortestPath(String start, String goal) {
         if (!nodes.containsKey(start) || !nodes.containsKey(goal)) {
         return null;
@@ -228,6 +176,7 @@ class Dijkstra {
             }
         }
 
-        return null; // ingen väg hittades
+        // No path found
+        return null; 
     }
 }
