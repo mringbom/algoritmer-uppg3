@@ -177,66 +177,6 @@ class Vertex {
 
 }
 
-class TopSort {
-
-    public void TopSort(Graph g) throws CycleFound {
-        Map<Vertex, Integer> indegree = new HashMap<>();
-        int counter = 0;
-        List<Vertex> topOrder = new ArrayList<>();
-
-        // Add indegree for each node
-        for (Vertex v : g.nodes.values()) {
-            indegree.put(v, v.indegree);
-        }
-
-        Queue q = new Queue();
-
-        // Enqueue zero-indegree vertices
-        for (Vertex v : g.nodes.values()) {
-            if (indegree.get(v) == 0) {
-                q.enqueue(v);
-            }
-        }
-
-        while (!q.isEmpty()) {
-
-            Vertex v = q.dequeue();
-            topOrder.add(v);
-            counter++;
-
-            // Add indegree for each adjacent node
-            for (Vertex w : v.adjacentNodes) {
-                indegree.put(w, indegree.get(w) - 1);
-                if (indegree.get(w) == 0) {
-                    q.enqueue(w);
-                }
-            }
-        }
-
-
-        if (counter != g.nodes.size()) {
-            throw new CycleFound("Cycle found in graph");
-        }
-
-        // If no cycle in graph, print topological order
-        System.out.println("Topological order: ");
-        for (Vertex v : topOrder) {
-            System.out.println(v.name);
-        }
-
-
-    }
-}
-
-
-// CycleFound
-class CycleFound extends Exception{
-    public CycleFound(String message){
-        super(message);
-    }
-}
-
-
 class Queue {
 
     private class Node {
