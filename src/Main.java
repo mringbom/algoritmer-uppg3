@@ -102,12 +102,42 @@ class Graph {
     }
 
     // Print, for troubleshooting
-    public void printGraph() {
-        for (String vertex : nodes.keySet()) {
-            for (Vertex edges : nodes.get(vertex).adjacentNodes) {
-                System.out.println (vertex + " -> " + edges.name );
+    public void buildEdgesFromWords(List<String> words){
+        int n = words.size();
+
+        for (int i = 0; i < n; i++){
+            String a = words.get(i);
+
+            for (int j = i + 1; j < n; j++){
+                String b = words.get(j);
+
+                if (differsByOne(a,b)){
+                    addEdge(a, b);
+                    addEdge(b, a);
+                }
             }
         }
+    }
+
+    // Check if words differ by one char
+    public boolean differsByOne(String a, String b){
+        
+        if (a.length() != b.length()){
+            return false;
+        }
+        
+        int diff = 0;
+
+        for (int i = 0; i < a.length(); i++){
+            if (a.charAt(i) != b.charAt(i)){
+                diff++;
+            }
+            if (diff > 1){
+                return false;
+            }
+        }
+
+        return diff == 1;
     }
 
     // Shortest path using Dikjstra's algorithm
